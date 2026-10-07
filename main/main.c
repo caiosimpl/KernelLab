@@ -1,40 +1,39 @@
-#include "context.h"
 #include <stdio.h>
+#include "tcb.h"
 
-#define STACK_SIZE 2048
+extern void context_switch(tcb_t *atual, tcb_t *proxima);
+void tarefa_init(tcb_t *tcb, uint32_t *stack_mem, void (*func)(void));
 
-static uint8_t stack_tarefa_a[STACK_SIZE] __attribute__((aligned(16)));
-static uint8_t stack_tarefa_b[STACK_SIZE] __attribute__((aligned(16)));
+static tcb_t tcb_main, tcb_a, tcb_b;
+static uint32_t stack_a[1024] __attribute__((aligned(16)));
+static uint32_t stack_b[1024] __attribute__((aligned(16)));
 
-struct context ctx_main; 
-struct context ctx_a;
-struct context ctx_b;
-
-void tarefa_a(void) {
-    int contador = 0;
-    while (1) {
-        printf("Tarefa A: %d\n", contador++);
-        for (volatile int i = 0; i < 500000; i++); 
-        context_switch(&ctx_a, &ctx_b);
+void tarefa_A(void) {
+    int cont = 0;
+    while (cont < 100) {
+        printf("  [A] %d\n", cont);
+		cont++;
     }
+
+	context_switch(&tcb_a, &tcb_b);
 }
 
-void tarefa_b(void) {
-    int contador = 0;
-    while (1) {
-        printf("Tarefa B: %d\n", contador++);
-        for (volatile int i = 0; i < 500000; i++);
-        context_switch(&ctx_b, &ctx_a);
+void tarefa_B(void) {
+    int cont = 0;
+    while (cont < 100) {
+        printf("  [B] %d\n", cont);
+		cont++;
     }
+
+	context_switch(&tcb_b, &tcb_a);
 }
 
 void app_main(void) {
-    // Monta o contexto inicial de cada tarefa, tudo na mão
-    ctx_a.ra = (uint32_t) tarefa_a;
-    ctx_a.sp = (uint32_t)(stack_tarefa_a + STACK_SIZE); //topo da pilha
+    printf("=== troca de contexto (versao final) ===\n");
 
-    ctx_b.ra = (uint32_t) tarefa_b;
-    ctx_b.sp = (uint32_t)(stack_tarefa_b + STACK_SIZE);
+    tarefa_init(&tcb_a, stack_a, tarefa_A);
+    tarefa_init(&tcb_b, stack_b, tarefa_B);
 
-    context_switch(&ctx_main, &ctx_a);
+    context_switch(&tcb_main, &tcb_a);
 }
+

@@ -3,7 +3,7 @@
 KernelLab targets the **ESP32-C3 (RISC-V)**. You can run its firmware on a
 physical board or emulate the chip locally with QEMU
 
-## Tools at a glance
+## Tools
 
 | Tool | Purpose |
 | --- | --- |

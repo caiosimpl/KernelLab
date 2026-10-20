@@ -18,6 +18,18 @@ physical board or emulate the chip locally with QEMU
 Use a supported Python version, such as **Python 3.13**. Check yours with
 `python3 --version`.
 
+
+### Linux — Ubuntu / Debian
+
+```bash
+sudo apt update
+sudo apt install git wget flex bison gperf python3 python3-pip python3-venv \
+    cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0 \
+    libgcrypt20 libglib2.0-dev libpixman-1-0 libsdl2-2.0-0 libslirp0
+```
+
+On other distributions, install equivalent packages with your package manager.
+
 ### macOS — Homebrew
 
 Install Apple's Command Line Tools if needed:
@@ -32,17 +44,6 @@ Then install dependencies:
 brew install git cmake ninja python@3.13 dfu-util libgcrypt glib pixman sdl2 libslirp
 export PATH="$(brew --prefix python@3.13)/libexec/bin:$PATH"
 ```
-
-### Linux — Ubuntu / Debian
-
-```bash
-sudo apt update
-sudo apt install git wget flex bison gperf python3 python3-pip python3-venv \
-    cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0 \
-    libgcrypt20 libglib2.0-dev libpixman-1-0 libsdl2-2.0-0 libslirp0
-```
-
-On other distributions, install equivalent packages with your package manager.
 
 ## 2. Install ESP-IDF — once
 

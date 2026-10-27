@@ -1,13 +1,13 @@
 #Switch.S - troca de contexto (no momento cooperativa) RISC-V
 
 # void context_switch(tct_t *atual, tcb_t *outra) {
-# 	a0 = ponteiro pro TCB da tarefa que SAI (onde salvar o sp)
-#	a1 = ponteiro pro TCB da tarefa que ENTRA (onde ler o sp)
+# 	a0 = ponteiro pro PCB do processo que SAI (onde salvar o sp)
+#	a1 = ponteiro pro PCB da processo que ENTRA (onde ler o sp)
 
 #}
 
-# O campo sp ├® o PRIMEIRO da struct tcb_t enta o offset ├® 0
-# typedef struct {uint32_t *sp, uint32_t *stack_base} tcb_t;
+# O campo sp eh o PRIMEIRO da struct pcb_t enta o offset eh 0
+# typedef struct {uint32_t *sp, uint32_t *stack_base} pcb_t;
 
 
 .section .text
@@ -34,12 +34,12 @@ context_switch:
     sw  s10, 44(sp)
     sw  s11, 48(sp)
 
-	sw  sp, 0(a0)   # atual->sp = sp (salva o sp da TCB que sai)
+	sw  sp, 0(a0)   # atual->sp = sp (salva o sp do PCB que sai)
 
-	lw  sp, 0(a1)   # sp = proxima->sp (le o sp TCB da tarefa que entra)
+	lw  sp, 0(a1)   # sp = proxima->sp (le o sp PCB do processo que entra)
 
 
-	#restaura o contexo da proxima tarefa
+	#restaura o contexo do proximo processo
 	lw   ra,  0(sp)
     lw   s0,  4(sp)
     lw   s1,  8(sp)

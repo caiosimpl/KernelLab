@@ -1,39 +1,16 @@
-#include <stdio.h>
-#include "pcb.h"
+#include <stdint.h>
+#include "riscv/rv_utils.h"
+#include "esp_rom_sys.h"
 
-extern void context_switch(pcb_t *atual, pcb_t *proxima);
-void tarefa_init(pcb_t *pcb, uint32_t *stack_mem, void (*func)(void));
-
-static pcb_t pcb_main, pcb_a, pcb_b;
-static uint32_t stack_a[1024] __attribute__((aligned(16)));
-static uint32_t stack_b[1024] __attribute__((aligned(16)));
-
-void tarefa_A(void) {
-    int cont = 0;
-    while (cont < 100) {
-        printf("  [A] %d\n", cont);
-		cont++;
-    }
-
-	context_switch(&pcb_a, &pcb_b);
-}
-
-void tarefa_B(void) {
-    int cont = 0;
-    while (cont < 100) {
-        printf("  [B] %d\n", cont);
-		cont++;
-    }
-
-	context_switch(&pcb_b, &pcb_a);
-}
+volatile uint32_t tick_count = 0;      // o interceptador incrementa isso
+extern uint32_t meu_vector_table;      // a tabela do trap.S
 
 void app_main(void) {
-    printf("=== troca de contexto (versao final) ===\n");
+    // troca o mtvec pra NOSSA tabela
+    rv_utils_set_mtvec((uint32_t)&meu_vector_table);
 
-    tarefa_init(&pcb_a, stack_a, tarefa_A);
-    tarefa_init(&pcb_b, stack_b, tarefa_B);
-
-    context_switch(&pcb_main, &pcb_a);
+    while (1) {
+        esp_rom_printf("tick_count = %u\n", tick_count);
+        for (volatile int i = 0; i < 20000000; i++) { }   // espera na marra
+    }
 }
-

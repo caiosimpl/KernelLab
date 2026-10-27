@@ -1,5 +1,6 @@
 #include "pcb.h"
 #include <string.h>
+#include <stdio.h>
 
 #define MAX_PROCESSES 16
 
@@ -68,4 +69,4 @@ void table_list(void) {
 
 
 
-#endif
+//#endif

@@ -1,11 +1,12 @@
 #include "pcb.h"
 #include "process_table.h"
+#include "round_robin.h"
 
 #include <stdint.h>
 #include <stddef.h>
 
-#define QUEUE_SIZE 16
-#define QUANTUM 1
+#define QUEUE_SIZE RR_QUEUE_SIZE
+#define QUANTUM 1 //tick-count
 #define QUEUE_VAZIA 0xFFFF // Necessario definir esse valor pq como as posicoes começam em 0, pode ter um processo de pid 0 que se repetiria 16 vezes
 
 static uint16_t queue[QUEUE_SIZE];

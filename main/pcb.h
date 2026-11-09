@@ -1,5 +1,6 @@
 #ifndef PCB_H
 #define PCB_H
+#define STACK_WORDS 1024
 
 #include <stdint.h>
 #include <stddef.h>

@@ -1,4 +1,4 @@
-// arch/trap.S — tabela de vetores propria do KernelLa
+// arch/trap.S ÔÇö tabela de vetores propria do KernelLab
     
 	.global _interrupt_handler
     .global _panic_handler
@@ -57,14 +57,98 @@ meu_vector_table:
 // esse cara tem que ser uma troca de contexto completa com os 32 registradores
 // Temos que estudar como faze-la com os 32 regostradores e devolver o mret pro lugar certo
 meu_intercept:
-    addi sp, sp, -16        //abre espaco temporario
-    sw   t0, 0(sp)          // salva t0 e t1 (vou usar eles)
-    sw   t1, 4(sp)
-    la   t0, tick_count     // pega o endereco do contador
-    lw   t1, 0(t0)
-    addi t1, t1, 1          // tick_count++
-    sw   t1, 0(t0)
-    lw   t0, 0(sp)          // restaura t0 e t1 EXATAMENTE como estavam
-    lw   t1, 4(sp)
-    addi sp, sp, 16         // devolve o sp exatamente como estava
-    j    _interrupt_handler // repassa pro handler original (tick normal)
+    addi sp, sp, -144        //abre espaco temporario
+    sw   ra, 0(sp)
+    sw   t0, 16(sp)
+    sw   t1, 20(sp)
+    sw   t2, 24(sp)
+
+    addi t0, sp, 144       //salva o sp original em t0
+    sw   t0, 4(sp)         //salva sp original no frame
+
+    sw   s0, 28(sp)
+    sw   s1, 32(sp)
+    sw   a0, 36(sp)
+    sw   a1, 40(sp)
+    sw   a2, 44(sp)
+    sw   a3, 48(sp)
+    sw   a4, 52(sp)
+    sw   a5, 56(sp)
+    sw   a6, 60(sp)
+    sw   a7, 64(sp)
+    sw   s2, 68(sp)
+    sw   s3, 72(sp)
+    sw   s4, 76(sp)
+    sw   s5, 80(sp)
+    sw   s6, 84(sp)
+    sw   s7, 88(sp)
+    sw   s8, 92(sp)
+    sw   s9, 96(sp)
+    sw   s10, 100(sp)
+    sw   s11, 104(sp)
+    sw   t3, 108(sp)
+    sw   t4, 112(sp)
+    sw   t5, 116(sp)
+    sw   t6, 120(sp)
+
+    csrr t0, mepc       //salvamos o conteudos de mepc e mstatus
+    sw   t0, 124(sp)
+    csrr t0, mstatus
+    sw   t0, 128(sp)
+
+// incrementa tick
+   la    t0, tick_count
+   lw    t1, 0(t0)
+   addi  t1, t1, 1
+   sw    t1, 0(t0)
+
+//limpa a interrupcao do systimer (TARGET0)
+   li    t0, 0x6002306C   // SYSTIMER_INT_CLR_REG = 0x60023000 + 0x6c
+   li    t1, 1            // SYSTIMER_TARGET0_INT_CLR = BIT(0)
+   sw    t1, 0(t0)
+
+
+	mv	 a0, sp 		  // passa o sp atual (frame da tarefa que sai)
+	call pick_next_sp	  // a0 = sp do proximo (frama da tarefa que entra)
+	mv   sp, a0      	  // troca para o frame do proximo
+
+// restasura
+
+    lw   t0, 124(sp)
+    csrw mepc, t0
+    lw   t0, 128(sp)
+    csrw mstatus, t0
+
+    lw   ra, 0(sp)      //comecamos a restaurar o contexto
+    lw   t0, 16(sp)
+    lw   t1, 20(sp)
+    lw   t2, 24(sp)
+    lw   s0, 28(sp)
+    lw   s1, 32(sp)
+    lw   a0, 36(sp)
+    lw   a1, 40(sp)
+    lw   a2, 44(sp)
+    lw   a3, 48(sp)
+    lw   a4, 52(sp)
+    lw   a5, 56(sp)
+    lw   a6, 60(sp)
+    lw   a7, 64(sp)
+    lw   s2, 68(sp)
+    lw   s3, 72(sp)
+    lw   s4, 76(sp)
+    lw   s5, 80(sp)
+    lw   s6, 84(sp)
+    lw   s7, 88(sp)
+    lw   s8, 92(sp)
+    lw   s9, 96(sp)
+    lw   s10, 100(sp)
+    lw   s11, 104(sp)
+    lw   t3, 108(sp)
+    lw   t4, 112(sp)
+    lw   t5, 116(sp)
+    lw   t6, 120(sp)
+
+    addi sp, sp, 144
+
+   mret
+

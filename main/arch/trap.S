@@ -59,6 +59,8 @@ meu_vector_table:
 meu_intercept:
     addi sp, sp, -144        //abre espaco temporario
     sw   ra, 0(sp)
+    sw   tp, 8(sp)
+    sw   gp, 12(sp)
     sw   t0, 16(sp)
     sw   t1, 20(sp)
     sw   t2, 24(sp)
@@ -120,6 +122,8 @@ meu_intercept:
     csrw mstatus, t0
 
     lw   ra, 0(sp)      //comecamos a restaurar o contexto
+    lw   tp, 8(sp)
+    lw   gp, 12(sp)
     lw   t0, 16(sp)
     lw   t1, 20(sp)
     lw   t2, 24(sp)

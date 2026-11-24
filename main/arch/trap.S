@@ -1,3 +1,8 @@
+.equ TIMG0_BASE,       0x6001F000
+.equ TIMG0_T0CONFIG,   TIMG0_BASE + 0x00
+.equ TIMG0_INT_CLR,    TIMG0_BASE + 0x7C
+.equ TIMG0_T0_INT,     (1 << 0)
+.equ TIMG0_ALARM_EN,   (1 << 10)
 // arch/trap.S ÔÇö tabela de vetores propria do KernelLab
     
 	.global _interrupt_handler
@@ -17,8 +22,8 @@ meu_vector_table:
     j _interrupt_handler
     j _interrupt_handler
     j _interrupt_handler
-    j meu_intercept         // 4: esse cara eh onde a interrupcao de time bate e gente "redireciona"
     j _interrupt_handler
+    j meu_intercept           //linha 5
     j _interrupt_handler
     j _interrupt_handler    
     j _interrupt_handler
@@ -104,11 +109,21 @@ meu_intercept:
    addi  t1, t1, 1
    sw    t1, 0(t0)
 
-//limpa a interrupcao do systimer (TARGET0)
-   li    t0, 0x6002306C   // SYSTIMER_INT_CLR_REG = 0x60023000 + 0x6c
-   li    t1, 1            // SYSTIMER_TARGET0_INT_CLR = BIT(0)
-   sw    t1, 0(t0)
+//limpa a interrupcao do TIMG0 TIMER0
+   li t0, TIMG0_INT_CLR
+   li t1, TIMG0_T0_INT
+   sw t1, 0(t0)
 
+   # Rearma o alarme do TIMER0
+   li t0, TIMG0_T0CONFIG
+   lw t1, 0(t0)
+
+   li t2, TIMG0_ALARM_EN
+   or t1, t1, t2
+
+   sw t1, 0(t0)
+
+   fence iorw, iorw
 
 	mv	 a0, sp 		  // passa o sp atual (frame da tarefa que sai)
 	call pick_next_sp	  // a0 = sp do proximo (frama da tarefa que entra)
@@ -116,6 +131,8 @@ meu_intercept:
 
 // restasura
 
+    .global restore_preempt_frame
+restore_preempt_frame:
     lw   t0, 124(sp)
     csrw mepc, t0
     lw   t0, 128(sp)

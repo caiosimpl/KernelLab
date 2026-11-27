@@ -1,5 +1,20 @@
+# Build e saida do ESP-IDF
 build/
 managed_components/
 dependencies.lock
+
+# Config gerada/local
 sdkconfig.old
+# sdkconfig        # descomente so quando migrar pra sdkconfig.defaults
+
+# Cache de IDE / clangd
+.cache/
+.vscode/
+compile_commands.json
+
+# Config pessoal do instalador ESP-IDF
 eim_config.toml
+
+# Python
+__pycache__/
+*.pyc

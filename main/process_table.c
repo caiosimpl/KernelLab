@@ -6,6 +6,7 @@
 #define MAX_PROCESSES 16
 
 static pcb_t table[MAX_PROCESSES];
+static _Alignas(16) uint32_t pilhas[MAX_PROCESSES][STACK_WORDS];
 static uint16_t next_pid = 1;
 
 void table_init(void) {
@@ -21,6 +22,7 @@ pcb_t* table_create(const char *name, uint8_t priority) {
 		if(table[i].state == FREE) {
 			table[i].pid = next_pid++;
 			table[i].state = READY;
+			table[i].stack_base = pilhas[i];
 			table[i].priority = priority;
 			strncpy(table[i].name, name, 15);
 
